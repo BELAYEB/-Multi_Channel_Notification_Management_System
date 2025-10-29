@@ -44,7 +44,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: mahmoudbelayeb@gmail.com
-    password: vmvy itip vcjr uaup  # ?? Remplacez par VOTRE mot de passe d'application (16 caractères)
+    password:   # ?? Remplacez par VOTRE mot de passe d'application (16 caractères)
     properties:
       mail:
         smtp:
@@ -98,11 +98,11 @@ notification:
 twilio:
   enabled: false
   account:
-    sid: AC9c206b6a4b7368d570e45d9acd2555b3
+    sid:
   auth:
-    token: 3bef26e3f88d9e9814ce256fb02127f7
+    token:
   phone:
-    number: +21620658611
+    number:
 
 # Optional: Firebase Configuration (if using real Push notifications)
 firebase:

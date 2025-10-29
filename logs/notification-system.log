@@ -3525,3 +3525,100 @@ com.tekup.multi_channel_notification_management_system.common.exception.Notifica
 2025-10-29 16:22:16 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-10-29 16:22:16 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
 2025-10-29 16:22:16 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2025-10-29 16:22:39 [restartedMain] INFO  c.t.m.MultiChannelNotificationManagementSystemApplication - Starting MultiChannelNotificationManagementSystemApplication using Java 17.0.12 with PID 23076 (C:\Users\MahmoudBELAYEB\Documents\ArchiLog\Multi_Channel_Notification_Management_System\target\classes started by MahmoudBELAYEB in C:\Users\MahmoudBELAYEB\Documents\ArchiLog\Multi_Channel_Notification_Management_System)
+2025-10-29 16:22:39 [restartedMain] INFO  c.t.m.MultiChannelNotificationManagementSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2025-10-29 16:22:39 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-10-29 16:22:39 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-10-29 16:22:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-29 16:22:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 190 ms. Found 1 JPA repository interface.
+2025-10-29 16:22:44 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-10-29 16:22:44 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-10-29 16:22:44 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-10-29 16:22:45 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-10-29 16:22:45 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 5071 ms
+2025-10-29 16:22:45 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-29 16:22:45 [restartedMain] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-10-29 16:22:45 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-10-29 16:22:46 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-29 16:22:46 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-29 16:22:46 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7b5290f1
+2025-10-29 16:22:46 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-29 16:22:46 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-10-29 16:22:46 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-10-29 16:22:46 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-10-29 16:22:48 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-10-29 16:22:49 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-29 16:22:49 [restartedMain] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-10-29 16:22:51 [restartedMain] INFO  o.s.v.b.OptionalValidatorFactoryBean - Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2025-10-29 16:22:52 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-10-29 16:22:52 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-10-29 16:22:52 [restartedMain] INFO  c.t.m.MultiChannelNotificationManagementSystemApplication - Started MultiChannelNotificationManagementSystemApplication in 14.945 seconds (process running for 19.099)
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  c.t.m.p.c.NotificationController - Received request to send notification to: +21629388136
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  c.t.m.b.s.NotificationServiceImpl - Processing notification for recipient: +21629388136
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  c.t.m.b.p.MessageTemplateFactory - Creating new template: ORDER_CONFIRM
+2025-10-29 16:23:19 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.tekup.multi_channel_notification_management_system.persistence.entity.NotificationEntity */insert 
+    into
+        notifications (channel, created_at, error_message, message, priority, recipient, retry_count, sent_at, status, subject, template_type, updated_at) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  c.t.m.b.h.NotificationChainBuilder - Building notification handler chain
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  c.t.m.business.handler.SMSHandler - SMSHandler processing notification for: +21629388136
+2025-10-29 16:23:19 [http-nio-8080-exec-2] INFO  c.t.m.i.sms.SMSServiceImpl - Sending SMS to: +21629388136
+2025-10-29 16:23:20 [http-nio-8080-exec-2] INFO  c.t.m.i.sms.SMSServiceImpl - SMS sent successfully to: +21629388136
+2025-10-29 16:23:20 [http-nio-8080-exec-2] INFO  c.t.m.business.handler.SMSHandler - SMS sent successfully to: +21629388136
+2025-10-29 16:23:20 [http-nio-8080-exec-2] INFO  c.t.m.b.s.NotificationServiceImpl - Notification sent successfully. ID: 12
+2025-10-29 16:23:20 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    /* update
+        for com.tekup.multi_channel_notification_management_system.persistence.entity.NotificationEntity */update notifications 
+    set
+        channel=?,
+        error_message=?,
+        message=?,
+        priority=?,
+        recipient=?,
+        retry_count=?,
+        sent_at=?,
+        status=?,
+        subject=?,
+        template_type=?,
+        updated_at=? 
+    where
+        id=?
+2025-10-29 16:23:20 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.tekup.multi_channel_notification_management_system.persistence.entity.NotificationEntity.customData */insert 
+    into
+        notification_custom_data (notification_id, data_key, data_value) 
+    values
+        (?, ?, ?)
+2025-10-29 16:23:20 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.tekup.multi_channel_notification_management_system.persistence.entity.NotificationEntity.customData */insert 
+    into
+        notification_custom_data (notification_id, data_key, data_value) 
+    values
+        (?, ?, ?)
+2025-10-29 16:23:20 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.tekup.multi_channel_notification_management_system.persistence.entity.NotificationEntity.customData */insert 
+    into
+        notification_custom_data (notification_id, data_key, data_value) 
+    values
+        (?, ?, ?)
+2025-10-29 16:32:52 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-10-29 16:32:53 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-10-29 16:32:53 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-10-29 16:32:54 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-10-29 16:32:54 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
