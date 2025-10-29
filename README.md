@@ -234,8 +234,121 @@ notification.getMessage());
 }
 }
 ```
+**Problèmes identifiés :**
+- ❌ Violation du principe **Open/Closed** (ajout = modification)
+- ❌ **Couplage fort** entre le service et les implémentations
+- ❌ Logique de routage **mélangée** avec la logique métier
+- ❌ Difficile à **tester** unitairement
+- ❌ Impossible d'ajouter de nouveaux canaux sans modifier le code existant
 
+#### Solution avec Chain of Responsibility
 
+##### Structure du Pattern
+
+```java
+// 1. INTERFACE - Contrat commun
+public interface NotificationHandler {
+void setNext(NotificationHandler handler);
+void handle(Notification notification);
+}
+
+// 2. CLASSE ABSTRAITE - Logique commune de chaînage
+@Slf4j
+public abstract class BaseNotificationHandler implements NotificationHandler {
+protected NotificationHandler next;
+protected final String handlerName;
+
+protected BaseNotificationHandler(String handlerName) {
+    this.handlerName = handlerName;
+}
+
+@Override
+public void setNext(NotificationHandler handler) {
+    this.next = handler;
+    log.info("🔗 {} → chaîné avec {}", 
+            this.handlerName, 
+            ((BaseNotificationHandler)handler).handlerName);
+}
+
+@Override
+public void handle(Notification notification) {
+    log.info("🔍 {} reçoit la notification", handlerName);
+    
+    if (canHandle(notification)) {
+        log.info("✅ {} PEUT traiter cette notification!", handlerName);
+        process(notification);
+    } else {
+        log.info("❌ {} ne peut PAS traiter le canal {}", 
+                handlerName, notification.getChannel());
+        passToNext(notification);
+    }
+}
+
+protected void passToNext(Notification notification) {
+    if (next != null) {
+        log.info("⏭️  Passage à {} →", 
+                ((BaseNotificationHandler)next).handlerName);
+        next.handle(notification);
+    } else {
+        log.warn("⛔ Fin de chaîne atteinte. Aucun handler disponible.");
+    }
+}
+
+// Méthodes abstraites à implémenter par les handlers concrets
+protected abstract boolean canHandle(Notification notification);
+protected abstract void process(Notification notification);
+}
+
+// 3. HANDLER CONCRET - Email
+@Component
+@RequiredArgsConstructor
+public class EmailHandler extends BaseNotificationHandler {
+private final EmailService emailService;
+
+public EmailHandler(EmailService emailService) {
+    super("📧 EmailHandler");
+    this.emailService = emailService;
+}
+
+@Override
+protected boolean canHandle(Notification notification) {
+    return notification.getChannel() == Channel.EMAIL;
+}
+
+@Override
+protected void process(Notification notification) {
+    emailService.sendEmail(
+        notification.getRecipient(),
+        notification.getSubject(),
+        notification.getMessage()
+    );
+    log.info("✅ Email envoyé avec succès!");
+}
+}
+
+// 4. BUILDER - Construction de la chaîne
+@Component
+@RequiredArgsConstructor
+public class NotificationChainBuilder {
+private final EmailHandler emailHandler;
+private final SMSHandler smsHandler;
+private final PushHandler pushHandler;
+
+public NotificationHandler buildChain() {
+    log.info("╔════════════════════════════════════════╗");
+    log.info("║   CONSTRUCTION DE LA CHAÎNE            ║");
+    log.info("╚════════════════════════════════════════╝");
+    
+    // Construire la chaîne: Email → SMS → Push
+    emailHandler.setNext(smsHandler);
+    smsHandler.setNext(pushHandler);
+    
+    log.info("✅ Chaîne construite: 📧 Email → 📱 SMS → 🔔 Push");
+    
+    return emailHandler; // Retourner le premier maillon
+}
+}
+```
 
 
 
