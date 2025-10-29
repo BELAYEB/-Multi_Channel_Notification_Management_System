@@ -184,29 +184,17 @@ capture package diagram
 
 ### Flux de Données
 Client HTTP Request
-
-        ↓
-        
+        ↓    
 NotificationController (Presentation)
-
-        ↓ [DTO → Model]
-        
+        ↓     
 NotificationService (Business)
-
-        ↓ [Uses Chain]
-        
+        ↓ [Uses Chain]      
 EmailHandler/SMSHandler/PushHandler (Business)
-
-        ↓ [Uses Infrastructure]
-        
+        ↓ [Uses Infrastructure]      
 EmailService/SMSService/PushService (Infrastructure)
-
         ↓ [Saves to DB]
-        
 NotificationRepository (Persistence)
-
-        ↓
-        
+        ↓       
 Database (MySQL)
 
 
