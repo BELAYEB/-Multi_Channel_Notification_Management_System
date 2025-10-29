@@ -2,8 +2,8 @@
 
 ## Architecture Logicielle - Projet Académique
 
-**Étudiants:** - Mahmoud BELAYEB - Achraf LTAIEF - Nassim TARKHANI - Med Aziz MZEH
-***Groupe:**  ING-4-GLSI-A
+**Étudiants:** Mahmoud BELAYEB - Achraf LTAIEF - Nassim TARKHANI - Med Aziz MZEH
+**Groupe:** ING-4-GLSI-A
 **Module:** Architecture Logicielle  
 **Date:** 2025/2026  
 **Établissement:** TEK-UP University
