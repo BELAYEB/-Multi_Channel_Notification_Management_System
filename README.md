@@ -131,7 +131,7 @@ public class NotificationService {
 
 ### Vue d'Ensemble Complète
 
-Capture class diagram
+<img width="1233" height="848" alt="classDiagram" src="https://github.com/user-attachments/assets/1f60b60a-68ba-433e-a0e4-1fdcf3f46ecf" />
 
 
 ### Relations Entre Classes
