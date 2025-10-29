@@ -2,10 +2,10 @@
 
 ## Architecture Logicielle - Projet Académique
 
-**Étudiant:** Mahmoud BELAYEB  
-**Email:** mahmoud.belayeb@tek-up.de  
+**Étudiants:** - Mahmoud BELAYEB - Achraf LTAIEF - Nassim TARKHANI - Med Aziz MZEH
+***Groupe:**  ING-4-GLSI-A
 **Module:** Architecture Logicielle  
-**Date:** Octobre 2025  
+**Date:** 2025/2026  
 **Établissement:** TEK-UP University
 
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://www.oracle.com/java/)
@@ -71,7 +71,8 @@ Système complet de gestion de notifications multi-canal permettant l'envoi de m
 Le projet adopte une **architecture en couches** stricte, organisant le code en 4 couches distinctes avec des responsabilités clairement définies.
 
 
-capture architecture
+<img width="237" height="130" alt="image" src="https://github.com/user-attachments/assets/3b0b4cc0-7260-4788-aee4-9fc9e17bae53" />
+
 
 
 ### Justification Architecturale
@@ -90,7 +91,6 @@ Chaque couche a un rôle unique et bien défini :
 #### 2. Principe de Dépendance Unidirectionnelle
 
 Presentation → Business → Persistence → Infrastructure
-
 
 Les dépendances vont uniquement vers le bas. Aucune couche inférieure ne connaît les couches supérieures.
 
@@ -161,7 +161,7 @@ public class NotificationService {
 #### Package Presentation
 **Responsabilité** : Interface avec le monde extérieur  
 **Contenu** : Controllers REST, DTOs, Validation  
-**Pourquoi** : Isoler la couche de présentation permet de changer l'interface (REST → GraphQL → gRPC) sans impacter le métier
+**Pourquoi** : Isoler la couche de présentation permet de changer l'interface (REST → GraphQL) sans impacter le métier
 
 #### Package Business
 **Responsabilité** : Logique métier et patterns  
@@ -184,19 +184,10 @@ public class NotificationService {
 **Pourquoi** : Éviter la duplication de code à travers les couches
 
 ### Flux de Données
-Client HTTP Request
-        ↓    
-NotificationController (Presentation)
-        ↓     
-NotificationService (Business)
-        ↓ [Uses Chain]      
-EmailHandler/SMSHandler/PushHandler (Business)
-        ↓ [Uses Infrastructure]      
-EmailService/SMSService/PushService (Infrastructure)
-        ↓ [Saves to DB]
-NotificationRepository (Persistence)
-        ↓       
-Database (MySQL)
+Client HTTP Request ->   NotificationController (Presentation) ->    
+NotificationService (Business) ->  EmailHandler/SMSHandler/PushHandler (Business) ->     
+EmailService/SMSService/PushService (Infrastructure) -> NotificationRepository (Persistence)      
+-> Database (MySQL)
 
 
 ---
@@ -212,22 +203,22 @@ Sans ce pattern, le code ressemblerait à ceci :
 ```java
 // ❌ APPROCHE PROBLÉMATIQUE - Couplage Fort
 public class NotificationService {
-public void sendNotification(Notification notification) {
-if (notification.getChannel() == Channel.EMAIL) {
-emailService.sendEmail(notification.getRecipient(),
-notification.getSubject(),
-notification.getMessage());
-} else if (notification.getChannel() == Channel.SMS) {
-smsService.sendSMS(notification.getRecipient(),
-notification.getMessage());
-} else if (notification.getChannel() == Channel.PUSH) {
-pushService.sendPush(notification.getRecipient(),
-notification.getSubject(),
-notification.getMessage());
-}
-// Pour ajouter WhatsApp, il faut MODIFIER cette méthode
-// Violation du principe Open/Closed !
-}
+  public void sendNotification(Notification notification) {
+    if (notification.getChannel() == Channel.EMAIL) {
+    emailService.sendEmail(notification.getRecipient(),
+    notification.getSubject(),
+    notification.getMessage());
+  } else if (notification.getChannel() == Channel.SMS) {
+    smsService.sendSMS(notification.getRecipient(),
+    notification.getMessage());
+  } else if (notification.getChannel() == Channel.PUSH) {
+    pushService.sendPush(notification.getRecipient(),
+    notification.getSubject(),
+    notification.getMessage());
+  }
+  // Pour ajouter WhatsApp, il faut MODIFIER cette méthode
+  // Violation du principe Open/Closed !
+  }
 }
 ```
 **Problèmes identifiés :**
@@ -251,23 +242,23 @@ void handle(Notification notification);
 // 2. CLASSE ABSTRAITE - Logique commune de chaînage
 @Slf4j
 public abstract class BaseNotificationHandler implements NotificationHandler {
-protected NotificationHandler next;
-protected final String handlerName;
+  protected NotificationHandler next;
+  protected final String handlerName;
 
-protected BaseNotificationHandler(String handlerName) {
+  protected BaseNotificationHandler(String handlerName) {
     this.handlerName = handlerName;
-}
+  }
 
-@Override
-public void setNext(NotificationHandler handler) {
+  @Override
+  public void setNext(NotificationHandler handler) {
     this.next = handler;
     log.info("🔗 {} → chaîné avec {}", 
             this.handlerName, 
             ((BaseNotificationHandler)handler).handlerName);
-}
+  }
 
-@Override
-public void handle(Notification notification) {
+  @Override
+  public void handle(Notification notification) {
     log.info("🔍 {} reçoit la notification", handlerName);
     
     if (canHandle(notification)) {
@@ -278,8 +269,8 @@ public void handle(Notification notification) {
                 handlerName, notification.getChannel());
         passToNext(notification);
     }
-}
-
+  }
+  
 protected void passToNext(Notification notification) {
     if (next != null) {
         log.info("⏭️  Passage à {} →", 
@@ -288,49 +279,49 @@ protected void passToNext(Notification notification) {
     } else {
         log.warn("⛔ Fin de chaîne atteinte. Aucun handler disponible.");
     }
-}
+  }
 
-// Méthodes abstraites à implémenter par les handlers concrets
-protected abstract boolean canHandle(Notification notification);
-protected abstract void process(Notification notification);
+  // Méthodes abstraites à implémenter par les handlers concrets
+  protected abstract boolean canHandle(Notification notification);
+  protected abstract void process(Notification notification);
 }
 
 // 3. HANDLER CONCRET - Email
 @Component
 @RequiredArgsConstructor
 public class EmailHandler extends BaseNotificationHandler {
-private final EmailService emailService;
+  private final EmailService emailService;
 
-public EmailHandler(EmailService emailService) {
+  public EmailHandler(EmailService emailService) {
     super("📧 EmailHandler");
     this.emailService = emailService;
-}
+  }
 
-@Override
-protected boolean canHandle(Notification notification) {
+  @Override
+  protected boolean canHandle(Notification notification) {
     return notification.getChannel() == Channel.EMAIL;
-}
-
-@Override
-protected void process(Notification notification) {
+  }
+  
+  @Override
+  protected void process(Notification notification) {
     emailService.sendEmail(
         notification.getRecipient(),
         notification.getSubject(),
         notification.getMessage()
     );
     log.info("✅ Email envoyé avec succès!");
-}
+  }
 }
 
 // 4. BUILDER - Construction de la chaîne
 @Component
 @RequiredArgsConstructor
 public class NotificationChainBuilder {
-private final EmailHandler emailHandler;
-private final SMSHandler smsHandler;
-private final PushHandler pushHandler;
+  private final EmailHandler emailHandler;
+  private final SMSHandler smsHandler;
+  private final PushHandler pushHandler;
 
-public NotificationHandler buildChain() {
+  public NotificationHandler buildChain() {
     log.info("╔════════════════════════════════════════╗");
     log.info("║   CONSTRUCTION DE LA CHAÎNE            ║");
     log.info("╚════════════════════════════════════════╝");
@@ -342,7 +333,7 @@ public NotificationHandler buildChain() {
     log.info("✅ Chaîne construite: 📧 Email → 📱 SMS → 🔔 Push");
     
     return emailHandler; // Retourner le premier maillon
-}
+  }
 }
 ```
 
@@ -425,11 +416,11 @@ Sans ce pattern, imaginez envoyer **10,000 notifications de bienvenue** :
 ```java
 // ❌ APPROCHE PROBLÉMATIQUE - Duplication Massive
 for (int i = 0; i < 10000; i++) {
-Notification notif = new Notification();
-notif.setTitle("Bienvenue {userName}"); // DUPLIQUÉ 10,000 fois !
-notif.setBody("Merci de vous être inscrit sur {platformName}..."); // DUPLIQUÉ 10,000 fois !
-notif.setRecipient(users[i].getEmail());
-send(notif);
+  Notification notif = new Notification();
+  notif.setTitle("Bienvenue {userName}"); // DUPLIQUÉ 10,000 fois !
+  notif.setBody("Merci de vous être inscrit sur {platformName}..."); // DUPLIQUÉ 10,000 fois !
+  notif.setRecipient(users[i].getEmail());
+  send(notif);
 }
 ```
 
@@ -457,12 +448,12 @@ Le pattern Flyweight sépare les données en deux types :
 // 1. FLYWEIGHT - Template Partagé
 public class MessageTemplate {
   // ========== ÉTAT INTRINSÈQUE (partagé) ==========
-private final String templateId;
-private final String titlePattern;
-private final String bodyPattern;
-private final String format;
+  private final String templateId;
+  private final String titlePattern;
+  private final String bodyPattern;
+  private final String format;
 
-public MessageTemplate(String templateId, String titlePattern, 
+  public MessageTemplate(String templateId, String titlePattern, 
                       String bodyPattern, String format) {
     this.templateId = templateId;
     this.titlePattern = titlePattern;
@@ -492,11 +483,11 @@ private String replacePlaceholders(String pattern, Map<String, String> data) {
 // 2. FLYWEIGHT FACTORY - Gestion du Cache
 @Component
 public class MessageTemplateFactory {
-// Cache des templates (un seul objet par type)
-private final ConcurrentHashMap<String, MessageTemplate> templates = 
+  // Cache des templates (un seul objet par type)
+  private final ConcurrentHashMap<String, MessageTemplate> templates = 
         new ConcurrentHashMap<>();
 
-public MessageTemplate getTemplate(String type) {
+  public MessageTemplate getTemplate(String type) {
     // Si le template existe en cache, on le retourne
     // Sinon, on le crée et on le met en cache
     return templates.computeIfAbsent(type, this::createTemplate);
@@ -546,7 +537,7 @@ public void clearCache() {
 public class NotificationServiceImpl {
   private final MessageTemplateFactory templateFactory;
 
-public Notification sendNotification(Notification notification) {
+  public Notification sendNotification(Notification notification) {
     if (notification.getTemplateType() != null) {
         // Récupération du template (partagé, une seule instance)
         MessageTemplate template = 
@@ -623,36 +614,36 @@ Les 5 principes SOLID sont **rigoureusement appliqués** dans tout le projet.
 public class EmailServiceImpl implements EmailService {
   private final JavaMailSender mailSender;
 
-@Override
-public void sendEmail(String to, String subject, String body) {
+  @Override
+  public void sendEmail(String to, String subject, String body) {
     // Logique SMTP uniquement
     SimpleMailMessage message = new SimpleMailMessage();
     message.setTo(to);
     message.setSubject(subject);
     message.setText(body);
     mailSender.send(message);
-}
+  }
 }
 // Responsable UNIQUEMENT de la validation
 @Component
 public class NotificationValidator {
-public boolean validate(Notification notification) {
+  public boolean validate(Notification notification) {
     return notification.getRecipient() != null 
         && notification.getChannel() != null
         && notification.getMessage() != null;
-}
+  }
 }
 
 // Responsable UNIQUEMENT du mapping
 @Component
 public class NotificationMapper {
-public NotificationEntity toEntity(Notification notification) {
+  public NotificationEntity toEntity(Notification notification) {
     // Mapping Model → Entity
-}
+  }
 
-public Notification toModel(NotificationEntity entity) {
+  public Notification toModel(NotificationEntity entity) {
     // Mapping Entity → Model
-}
+  }
 }
 ```
 
@@ -661,11 +652,11 @@ public Notification toModel(NotificationEntity entity) {
 ```java
 // EmailHandler : Responsable UNIQUEMENT des emails
 public class EmailHandler extends BaseNotificationHandler {
-// Logique email uniquement
+  // Logique email uniquement
 }
 
 // SMSHandler : Responsable UNIQUEMENT des SMS
-public class SMSHandler extends BaseNotificationHandler {
+  public class SMSHandler extends BaseNotificationHandler {
 // Logique SMS uniquement
 }
 ```
@@ -685,12 +676,12 @@ public class SMSHandler extends BaseNotificationHandler {
 // ✅ Code EXISTANT - NON MODIFIÉ
 @Component
 public class EmailHandler extends BaseNotificationHandler {
-// Code inchangé
+  // Code inchangé
 }
 
 @Component
 public class SMSHandler extends BaseNotificationHandler {
-// Code inchangé
+  // Code inchangé
 }
 
 // ✅ NOUVEAU CODE - EXTENSION
@@ -713,11 +704,11 @@ protected void process(Notification notification) {
 }
 // Dans le builder, on AJOUTE simplement
 public NotificationHandler buildChain() {
-emailHandler.setNext(smsHandler);
-smsHandler.setNext(whatsAppHandler); // ← AJOUT, pas modification
-whatsAppHandler.setNext(pushHandler);
+  emailHandler.setNext(smsHandler);
+  smsHandler.setNext(whatsAppHandler); // ← AJOUT, pas modification
+  whatsAppHandler.setNext(pushHandler);
 
-return emailHandler;
+  return emailHandler;
 
 }
 
@@ -727,17 +718,17 @@ return emailHandler;
 ```java
 // Dans MessageTemplateFactory, on AJOUTE un cas
 private MessageTemplate createTemplate(String type) {
-return switch (type) {
-case "WELCOME" -> /* ... /;
-case "ORDER_CONFIRM" -> / ... */;
-case "PAYMENT_SUCCESS" -> new MessageTemplate( // ← NOUVEAU
-"PAYMENT_SUCCESS",
-"Paiement réussi",
-"Votre paiement de {amount} a été confirmé",
-"HTML"
-);
-default -> throw new IllegalArgumentException("Unknown: " + type);
-};
+  return switch (type) {
+    case "WELCOME" -> /* ... /;
+    case "ORDER_CONFIRM" -> / ... */;
+    case "PAYMENT_SUCCESS" -> new MessageTemplate( // ← NOUVEAU
+      "PAYMENT_SUCCESS",
+      "Paiement réussi",
+      "Votre paiement de {amount} a été confirmé",
+      "HTML"
+    );
+    default -> throw new IllegalArgumentException("Unknown: " + type);
+  };
 }
 ```
 
@@ -759,12 +750,12 @@ NotificationHandler handler3 = new PushHandler(pushService);
 
 // Tous peuvent être utilisés via l'interface
 public void processNotification(NotificationHandler handler, Notification notif) {
-handler.handle(notif); // Fonctionne pour tous les handlers
+  handler.handle(notif); // Fonctionne pour tous les handlers
 }
 
 // Polymorphisme parfait
 List<NotificationHandler> handlers = Arrays.asList(
-handler1, handler2, handler3
+  handler1, handler2, handler3
 );
 handlers.forEach(h -> h.handle(notification));
 ```
@@ -785,12 +776,12 @@ handlers.forEach(h -> h.handle(notification));
 ```java
 // Interface trop large - Force à implémenter tout
 public interface NotificationService {
-void sendEmail(String to, String subject, String body);
-void sendSMS(String phone, String message);
-void sendPush(String token, String title, String body);
-void sendWhatsApp(String number, String message);
-void sendSlack(String channel, String message);
-void sendTelegram(String chatId, String message);
+  void sendEmail(String to, String subject, String body);
+  void sendSMS(String phone, String message);
+  void sendPush(String token, String title, String body);
+  void sendWhatsApp(String number, String message);
+  void sendSlack(String channel, String message);
+  void sendTelegram(String chatId, String message);
 }
 
 // EmailHandler est forcé d'implémenter SMS, Push, etc.
@@ -802,25 +793,25 @@ void sendTelegram(String chatId, String message);
 // Interfaces spécifiques et cohésives
 
 public interface EmailService {
-void sendEmail(String to, String subject, String body);
-void sendHtmlEmail(String to, String subject, String htmlBody);
+  void sendEmail(String to, String subject, String body);
+  void sendHtmlEmail(String to, String subject, String htmlBody);
 }
 
 public interface SMSService {
-void sendSMS(String phoneNumber, String message);
+  void sendSMS(String phoneNumber, String message);
 }
 
 public interface PushService {
-void sendPushNotification(String deviceToken, String title, String body);
+  void sendPushNotification(String deviceToken, String title, String body);
 }
 
 // Chaque handler dépend uniquement de ce dont il a besoin
 public class EmailHandler extends BaseNotificationHandler {
-private final EmailService emailService; // ✅ Seulement EmailService
+  private final EmailService emailService; // ✅ Seulement EmailService
 }
 
 public class SMSHandler extends BaseNotificationHandler {
-private final SMSService smsService; // ✅ Seulement SMSService
+  private final SMSService smsService; // ✅ Seulement SMSService
 }
 ```
 
@@ -838,23 +829,23 @@ private final SMSService smsService; // ✅ Seulement SMSService
 ```java
 @Service
 public class NotificationServiceImpl implements NotificationService {
-// Toutes les dépendances sont des ABSTRACTIONS (interfaces)
-private final NotificationRepository repository;      // Interface
-private final NotificationMapper mapper;              // Abstraction
-private final MessageTemplateFactory templateFactory; // Abstraction
-private final NotificationChainBuilder chainBuilder;  // Abstraction
+  // Toutes les dépendances sont des ABSTRACTIONS (interfaces)
+  private final NotificationRepository repository;      // Interface
+  private final NotificationMapper mapper;              // Abstraction
+  private final MessageTemplateFactory templateFactory; // Abstraction
+  private final NotificationChainBuilder chainBuilder;  // Abstraction
 
-// Injection via constructeur (Dependency Injection)
-public NotificationServiceImpl(
+  // Injection via constructeur (Dependency Injection)
+  public NotificationServiceImpl(
         NotificationRepository repository,
         NotificationMapper mapper,
         MessageTemplateFactory templateFactory,
         NotificationChainBuilder chainBuilder) {
-    this.repository = repository;
-    this.mapper = mapper;
-    this.templateFactory = templateFactory;
-    this.chainBuilder = chainBuilder;
-}
+      this.repository = repository;
+      this.mapper = mapper;
+      this.templateFactory = templateFactory;
+      this.chainBuilder = chainBuilder;
+  }
 }
 ```
 
