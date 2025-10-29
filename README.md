@@ -152,7 +152,8 @@ public class NotificationService {
 
 ### Structure Complète des Packages
 
-capture package diagram
+
+<img width="2694" height="904" alt="packageDiagram" src="https://github.com/user-attachments/assets/bd0b7748-3e55-446b-850c-b68c54205ffb" />
 
 
 ### Justification de la Répartition
