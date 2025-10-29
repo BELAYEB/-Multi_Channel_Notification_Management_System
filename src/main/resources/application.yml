@@ -66,6 +66,7 @@ logging:
     com.notification.system: DEBUG
     org.springframework.web: INFO
     org.springframework.mail: DEBUG
+    com.twilio: DEBUG  # Activer les logs Twilio
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
@@ -97,14 +98,16 @@ notification:
 twilio:
   enabled: false
   account:
-    sid: YOUR_TWILIO_ACCOUNT_SID
+    sid: AC9c206b6a4b7368d570e45d9acd2555b3
   auth:
-    token: YOUR_TWILIO_AUTH_TOKEN
+    token: 3bef26e3f88d9e9814ce256fb02127f7
   phone:
-    number: YOUR_TWILIO_PHONE_NUMBER
+    number: +21620658611
 
 # Optional: Firebase Configuration (if using real Push notifications)
 firebase:
   enabled: false
   credentials:
     path: classpath:firebase-service-account.json
+
+
