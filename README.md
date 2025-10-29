@@ -351,6 +351,236 @@ public NotificationHandler buildChain() {
 ```
 
 
+#### Diagramme de Séquence - Envoi SMS
+
+capture sequence diagram
+
+#### Avantages Démontrés
+
+##### 1. Extensibilité (Open/Closed Principle)
+
+```java
+// Pour ajouter WhatsApp, AUCUNE modification du code existant !
+@Component
+public class WhatsAppHandler extends BaseNotificationHandler {
+  private final WhatsAppService whatsAppService;
+
+  public WhatsAppHandler(WhatsAppService whatsAppService) {
+    super("💬 WhatsAppHandler");
+    this.whatsAppService = whatsAppService;
+  }
+
+  @Override
+  protected boolean canHandle(Notification notification) {
+    return notification.getChannel() == Channel.WHATSAPP;
+  }
+
+  @Override
+  protected void process(Notification notification) {
+    whatsAppService.sendMessage(notification.getRecipient(), 
+                                notification.getMessage());
+  }
+
+}
+// Dans le builder, on ajoute simplement dans la chaîne
+emailHandler.setNext(smsHandler);
+smsHandler.setNext(whatsAppHandler); // ← AJOUT
+whatsAppHandler.setNext(pushHandler);
+```
+
+
+##### 2. Découplage Total
+
+Le service ne connaît que l'interface `NotificationHandler`, pas les implémentations concrètes :
+
+```java
+@Service
+public class NotificationServiceImpl {
+  private final NotificationChainBuilder chainBuilder;
+
+  public Notification sendNotification(Notification notification) {
+    // Le service ne connaît PAS EmailHandler, SMSHandler, etc.
+    // Il connaît uniquement l'interface
+    NotificationHandler chain = chainBuilder.buildChain();
+    chain.handle(notification);
+    
+    return notification;
+  }
+}
+```
+
+
+##### 3. Single Responsibility
+
+Chaque handler a UNE responsabilité : gérer SON canal.
+
+EmailHandler → Responsable UNIQUEMENT des emails
+SMSHandler → Responsable UNIQUEMENT des SMS
+PushHandler → Responsable UNIQUEMENT des notifications push
+
+
+---
+
+### 2. Flyweight (Poids Mouche)
+
+#### Problème Résolu
+
+Sans ce pattern, imaginez envoyer **10,000 notifications de bienvenue** :
+```java
+// ❌ APPROCHE PROBLÉMATIQUE - Duplication Massive
+for (int i = 0; i < 10000; i++) {
+Notification notif = new Notification();
+notif.setTitle("Bienvenue {userName}"); // DUPLIQUÉ 10,000 fois !
+notif.setBody("Merci de vous être inscrit sur {platformName}..."); // DUPLIQUÉ 10,000 fois !
+notif.setRecipient(users[i].getEmail());
+send(notif);
+}
+```
+
+**Impact mémoire :**
+- Chaque notification : ~500 bytes
+- 10,000 notifications : **~5 MB** de données identiques en mémoire !
+- 1,000,000 notifications : **~500 MB** gaspillés !
+
+**Problèmes identifiés :**
+- ❌ **Duplication** massive des templates en mémoire
+- ❌ **Performance** dégradée (allocations répétées)
+- ❌ **Scalabilité** compromise pour systèmes à grande échelle
+- ❌ **Gaspillage** de ressources serveur
+
+#### Solution avec Flyweight
+
+Le pattern Flyweight sépare les données en deux types :
+
+- **État INTRINSÈQUE** (intrinsic) : Partagé entre tous les objets
+- **État EXTRINSÈQUE** (extrinsic) : Unique à chaque objet
+
+##### Structure du Pattern
+
+```java
+// 1. FLYWEIGHT - Template Partagé
+public class MessageTemplate {
+  // ========== ÉTAT INTRINSÈQUE (partagé) ==========
+private final String templateId;
+private final String titlePattern;
+private final String bodyPattern;
+private final String format;
+
+public MessageTemplate(String templateId, String titlePattern, 
+                      String bodyPattern, String format) {
+    this.templateId = templateId;
+    this.titlePattern = titlePattern;
+    this.bodyPattern = bodyPattern;
+    this.format = format;
+    
+    System.out.println("Creating new template: " + templateId);
+}
+
+// ========== ÉTAT EXTRINSÈQUE (unique, passé en paramètre) ==========
+public String renderTitle(Map<String, String> data) {
+    return replacePlaceholders(titlePattern, data);
+}
+
+public String renderBody(Map<String, String> data) {
+    return replacePlaceholders(bodyPattern, data);
+}
+
+private String replacePlaceholders(String pattern, Map<String, String> data) {
+    String result = pattern;
+    for (Map.Entry<String, String> entry : data.entrySet()) {
+        result = result.replace("{" + entry.getKey() + "}", entry.getValue());
+    }
+    return result;
+}
+}
+// 2. FLYWEIGHT FACTORY - Gestion du Cache
+@Component
+public class MessageTemplateFactory {
+// Cache des templates (un seul objet par type)
+private final ConcurrentHashMap<String, MessageTemplate> templates = 
+        new ConcurrentHashMap<>();
+
+public MessageTemplate getTemplate(String type) {
+    // Si le template existe en cache, on le retourne
+    // Sinon, on le crée et on le met en cache
+    return templates.computeIfAbsent(type, this::createTemplate);
+}
+
+private MessageTemplate createTemplate(String type) {
+    return switch (type) {
+        case "WELCOME" -> new MessageTemplate(
+            "WELCOME",
+            "Bienvenue {userName}",
+            "Merci de vous être inscrit sur {platformName}. " +
+            "Nous sommes ravis de vous compter parmi nous !",
+            "HTML"
+        );
+        
+        case "ORDER_CONFIRM" -> new MessageTemplate(
+            "ORDER_CONFIRM",
+            "Commande #{orderId} confirmée",
+            "Votre commande d'un montant de {amount} a été confirmée. " +
+            "Livraison prévue le {deliveryDate}.",
+            "HTML"
+        );
+        
+        case "PASSWORD_RESET" -> new MessageTemplate(
+            "PASSWORD_RESET",
+            "Réinitialisation de mot de passe",
+            "Bonjour {userName}, votre code de réinitialisation est: {resetCode}. " +
+            "Ce code expire dans {expirationTime} minutes.",
+            "TEXT"
+        );
+        
+        default -> throw new IllegalArgumentException(
+            "Unknown template type: " + type
+        );
+    };
+}
+
+public int getTemplateCount() {
+    return templates.size();
+}
+
+public void clearCache() {
+    templates.clear();
+}
+// 3. UTILISATION dans le Service
+@Service
+public class NotificationServiceImpl {
+  private final MessageTemplateFactory templateFactory;
+
+public Notification sendNotification(Notification notification) {
+    if (notification.getTemplateType() != null) {
+        // Récupération du template (partagé, une seule instance)
+        MessageTemplate template = 
+            templateFactory.getTemplate(notification.getTemplateType());
+        
+        // Rendu avec données spécifiques (état extrinsèque)
+        String title = template.renderTitle(notification.getCustomData());
+        String body = template.renderBody(notification.getCustomData());
+        
+        notification.setSubject(title);
+        notification.setMessage(body);
+    }
+    
+    // Envoi de la notification...
+    return notification;
+}
+}
+```
+
+#### Comparaison Mémoire Détaillée
+
+| Méthode | Notifications | Objets Template | Mémoire Utilisée | Économie |
+|---------|--------------|-----------------|------------------|----------|
+| **Sans Flyweight** | 10,000 | 10,000 (tous identiques) | ~5 MB | - |
+| **Avec Flyweight** | 10,000 | 1 (partagé) | ~500 bytes + données extrinsèques | **99.99%** |
+| **Sans Flyweight** | 1,000,000 | 1,000,000 | ~500 MB | - |
+| **Avec Flyweight** | 1,000,000 | 1 (partagé) | ~500 bytes + données extrinsèques | **99.99%** |
+
+#### Démonstration du Cache
+
 
 
 
