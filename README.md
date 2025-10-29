@@ -581,6 +581,91 @@ public Notification sendNotification(Notification notification) {
 
 #### Démonstration du Cache
 
+```java
+// Premier appel
+NotificationService.sendNotification(notification1);
+LOG: Creating new template: WELCOME ← Création
+
+// Deuxième appel (même type de template)
+NotificationService.sendNotification(notification2);
+(aucun log "Creating") ← Réutilisation du cache !
+
+// 9,998 appels suivants
+(aucun log "Creating") ← Toujours le même objet !
+
+// Statistiques
+factory.getTemplateCount(); // Retourne: 1
+// Une seule instance de template pour 10,000 notifications !
+```
+
+#### Avantages Démontrés
+
+##### 1. Optimisation Mémoire Drastique
+##### 2. Performance Améliorée
+##### 3. Centralisation de la Gestion
+##### 4. Scalabilité
+
+---
+
+## ✅ Principes SOLID
+
+Les 5 principes SOLID sont **rigoureusement appliqués** dans tout le projet.
+
+### 1. Single Responsibility Principle (SRP)
+
+**Principe** : Une classe ne doit avoir qu'**une seule raison de changer**.
+
+#### Application dans le Projet
+
+##### Exemple 1: Services Spécialisés
+
+```java
+// ✅ Chaque service a UNE responsabilité
+
+// Responsable UNIQUEMENT de l'envoi d'emails
+@Service
+public class EmailServiceImpl implements EmailService {
+  private final JavaMailSender mailSender;
+
+@Override
+public void sendEmail(String to, String subject, String body) {
+    // Logique SMTP uniquement
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setTo(to);
+    message.setSubject(subject);
+    message.setText(body);
+    mailSender.send(message);
+}
+}
+// Responsable UNIQUEMENT de la validation
+@Component
+public class NotificationValidator {
+public boolean validate(Notification notification) {
+    return notification.getRecipient() != null 
+        && notification.getChannel() != null
+        && notification.getMessage() != null;
+}
+}
+
+// Responsable UNIQUEMENT du mapping
+@Component
+public class NotificationMapper {
+public NotificationEntity toEntity(Notification notification) {
+    // Mapping Model → Entity
+}
+
+public Notification toModel(NotificationEntity entity) {
+    // Mapping Entity → Model
+}
+}
+```
+
+
+
+
+
+
+
 
 
 
