@@ -660,6 +660,272 @@ public Notification toModel(NotificationEntity entity) {
 }
 ```
 
+##### Exemple 2: Handlers
+
+```java
+// EmailHandler : Responsable UNIQUEMENT des emails
+public class EmailHandler extends BaseNotificationHandler {
+// Logique email uniquement
+}
+
+// SMSHandler : Responsable UNIQUEMENT des SMS
+public class SMSHandler extends BaseNotificationHandler {
+// Logique SMS uniquement
+}
+```
+
+**Avantage** : Modifications localisées. Changer la logique email n'affecte pas SMS.
+
+---
+
+### 2. Open/Closed Principle (OCP)
+
+**Principe** : Ouvert à l'**extension**, fermé à la **modification**.
+
+#### Application dans le Projet
+
+##### Exemple 1: Ajout de Nouveau Canal sans Modification
+```java
+// ✅ Code EXISTANT - NON MODIFIÉ
+@Component
+public class EmailHandler extends BaseNotificationHandler {
+// Code inchangé
+}
+
+@Component
+public class SMSHandler extends BaseNotificationHandler {
+// Code inchangé
+}
+
+// ✅ NOUVEAU CODE - EXTENSION
+@Component
+public class WhatsAppHandler extends BaseNotificationHandler {
+  private final WhatsAppService whatsAppService;
+
+@Override
+protected boolean canHandle(Notification notification) {
+    return notification.getChannel() == Channel.WHATSAPP;
+}
+
+@Override
+protected void process(Notification notification) {
+    whatsAppService.sendMessage(
+        notification.getRecipient(),
+        notification.getMessage()
+    );
+}
+}
+// Dans le builder, on AJOUTE simplement
+public NotificationHandler buildChain() {
+emailHandler.setNext(smsHandler);
+smsHandler.setNext(whatsAppHandler); // ← AJOUT, pas modification
+whatsAppHandler.setNext(pushHandler);
+
+return emailHandler;
+
+}
+
+```
+
+##### Exemple 2: Ajout de Nouveau Template
+```java
+// Dans MessageTemplateFactory, on AJOUTE un cas
+private MessageTemplate createTemplate(String type) {
+return switch (type) {
+case "WELCOME" -> /* ... /;
+case "ORDER_CONFIRM" -> / ... */;
+case "PAYMENT_SUCCESS" -> new MessageTemplate( // ← NOUVEAU
+"PAYMENT_SUCCESS",
+"Paiement réussi",
+"Votre paiement de {amount} a été confirmé",
+"HTML"
+);
+default -> throw new IllegalArgumentException("Unknown: " + type);
+};
+}
+```
+
+**Avantage** : Zéro risque de régression. Le code existant reste intact.
+
+---
+
+### 3. Liskov Substitution Principle (LSP)
+
+**Principe** : Les sous-classes doivent être **substituables** à leurs classes parentes.
+
+#### Application dans le Projet
+```java
+// ✅ Tous les handlers sont substituables
+
+NotificationHandler handler1 = new EmailHandler(emailService);
+NotificationHandler handler2 = new SMSHandler(smsService);
+NotificationHandler handler3 = new PushHandler(pushService);
+
+// Tous peuvent être utilisés via l'interface
+public void processNotification(NotificationHandler handler, Notification notif) {
+handler.handle(notif); // Fonctionne pour tous les handlers
+}
+
+// Polymorphisme parfait
+List<NotificationHandler> handlers = Arrays.asList(
+handler1, handler2, handler3
+);
+handlers.forEach(h -> h.handle(notification));
+```
+
+**Preuve** : Le comportement est cohérent quel que soit le handler utilisé.
+
+**Avantage** : Polymorphisme fonctionnel. Le code client ne connaît que l'interface.
+
+---
+
+### 4. Interface Segregation Principle (ISP)
+
+**Principe** : Ne pas forcer à dépendre de méthodes **non utilisées**.
+
+#### Application dans le Projet
+
+##### ❌ Mauvaise Approche (ISP Violé)
+```java
+// Interface trop large - Force à implémenter tout
+public interface NotificationService {
+void sendEmail(String to, String subject, String body);
+void sendSMS(String phone, String message);
+void sendPush(String token, String title, String body);
+void sendWhatsApp(String number, String message);
+void sendSlack(String channel, String message);
+void sendTelegram(String chatId, String message);
+}
+
+// EmailHandler est forcé d'implémenter SMS, Push, etc.
+// Même s'il ne les utilise pas !
+```
+
+##### ✅ Bonne Approche (ISP Respecté)
+```java
+// Interfaces spécifiques et cohésives
+
+public interface EmailService {
+void sendEmail(String to, String subject, String body);
+void sendHtmlEmail(String to, String subject, String htmlBody);
+}
+
+public interface SMSService {
+void sendSMS(String phoneNumber, String message);
+}
+
+public interface PushService {
+void sendPushNotification(String deviceToken, String title, String body);
+}
+
+// Chaque handler dépend uniquement de ce dont il a besoin
+public class EmailHandler extends BaseNotificationHandler {
+private final EmailService emailService; // ✅ Seulement EmailService
+}
+
+public class SMSHandler extends BaseNotificationHandler {
+private final SMSService smsService; // ✅ Seulement SMSService
+}
+```
+
+**Avantage** : Classes légères. Dépendances minimales. Tests simplifiés.
+
+---
+
+### 5. Dependency Inversion Principle (DIP)
+
+**Principe** : Dépendre d'**abstractions**, pas d'**implémentations** concrètes.
+
+#### Application dans le Projet
+
+##### ✅ Dépendances via Interfaces
+```java
+@Service
+public class NotificationServiceImpl implements NotificationService {
+// Toutes les dépendances sont des ABSTRACTIONS (interfaces)
+private final NotificationRepository repository;      // Interface
+private final NotificationMapper mapper;              // Abstraction
+private final MessageTemplateFactory templateFactory; // Abstraction
+private final NotificationChainBuilder chainBuilder;  // Abstraction
+
+// Injection via constructeur (Dependency Injection)
+public NotificationServiceImpl(
+        NotificationRepository repository,
+        NotificationMapper mapper,
+        MessageTemplateFactory templateFactory,
+        NotificationChainBuilder chainBuilder) {
+    this.repository = repository;
+    this.mapper = mapper;
+    this.templateFactory = templateFactory;
+    this.chainBuilder = chainBuilder;
+}
+}
+```
+
+**Avantage** : Découplage maximal. Testabilité (mocks). Flexibilité totale.
+
+---
+
+### Tableau Récapitulatif SOLID
+
+| Principe | Où dans le Projet | Exemple Concret | Bénéfice |
+|----------|-------------------|-----------------|----------|
+| **SRP** | EmailService, SMSService, PushService | Chaque service gère UN canal | Modifications localisées |
+| **OCP** | Ajout de WhatsAppHandler sans modification | Nouveau handler = nouvelle classe | Zéro régression |
+| **LSP** | Tous les handlers substituables | `NotificationHandler handler = new EmailHandler()` | Polymorphisme fonctionnel |
+| **ISP** | Interfaces EmailService, SMSService séparées | EmailHandler ne dépend pas de SMSService | Dépendances minimales |
+| **DIP** | Service dépend d'interfaces, pas d'implémentations | `private final EmailService emailService` | Découplage, testabilité |
+
+---
+
+## 🛠️ Technologies Utilisées
+
+### Backend
+
+| Technologie | Version | Rôle dans le Projet |
+|-------------|---------|---------------------|
+| **Java** | 17 | Langage principal |
+| **Spring Boot** | 3.2.0 | Framework principal |
+| **Spring Data JPA** | 3.2.0 | ORM et persistence |
+| **Spring Web** | 3.2.0 | API REST |
+| **Spring Mail** | 3.2.0 | Envoi d'emails |
+| **Hibernate** | 6.2.x | Implémentation JPA |
+| **MySQL** | 8.0 | Base de données |
+| **Lombok** | 1.18.30 | Réduction boilerplate |
+| **Maven** | 3.8+ | Build et dépendances |
+
+### Services Externes
+
+| Service | Version | Usage |
+|---------|---------|-------|
+| **Gmail SMTP** | - | Envoi d'emails réels |
+| **Twilio API** | SDK 9.14.1 | Envoi de SMS |
+| **Firebase FCM** | Admin SDK 9.3.0 | Push notifications |
+
+### Documentation & Testing
+
+| Outil | Version | Usage |
+|-------|---------|-------|
+| **Postman** | Latest | Tests API manuels |
+
+---
+
+## ⚙️ Installation et Configuration
+
+### Prérequis
+
+- ☕ **Java 17** ou supérieur
+- 🗄️ **MySQL 8.0** ou supérieur
+- 📦 **Maven 3.8** ou supérieur
+- 🔧 **Git** pour cloner le projet
+
+
+
+
+
+
+
+
 
 
 
