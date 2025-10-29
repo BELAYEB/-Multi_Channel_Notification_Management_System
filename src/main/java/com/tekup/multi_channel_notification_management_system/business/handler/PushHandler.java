@@ -14,10 +14,15 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class PushHandler extends BaseNotificationHandler {
 
     private final PushService pushService;
+
+
+    public PushHandler(PushService pushService) {
+        super("🔔 PushHandler");
+        this.pushService = pushService;
+    }
 
     @Override
     public void handle(Notification notification) {

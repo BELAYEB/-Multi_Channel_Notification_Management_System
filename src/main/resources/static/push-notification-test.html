@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Push Notifications - Chrome</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .token-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .token {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 2px solid #667eea;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        .instructions {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+        }
+        .instructions li {
+            margin: 10px 0;
+            color: #856404;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .copy-btn {
+            background: #28a745;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+        .notification-demo {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+        .notification-demo.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔔 Test Push Notifications</h1>
+    <p class="subtitle">Testez les notifications push de votre application Spring Boot</p>
+
+    <div>
+        <button id="enableBtn" onclick="requestPermission()">
+            📱 Activer les Notifications
+        </button>
+        <button id="copyBtn" onclick="copyToken()" disabled class="copy-btn">
+            📋 Copier le Token
+        </button>
+    </div>
+
+    <div id="status"></div>
+
+    <div class="token-section" id="tokenSection" style="display: none;">
+        <h3>🔑 Device Token (FCM):</h3>
+        <div class="token" id="token">En attente...</div>
+    </div>
+
+    <div class="notification-demo" id="notificationDemo">
+        <h3 style="color: #667eea;">🎉 Notification Reçue!</h3>
+        <p id="notificationContent"></p>
+    </div>
+
+    <div class="instructions">
+        <h3>📝 Instructions:</h3>
+        <ol>
+            <li><strong>Cliquez</strong> sur "Activer les Notifications"</li>
+            <li><strong>Autorisez</strong> les notifications dans Chrome</li>
+            <li><strong>Copiez</strong> le Device Token affiché</li>
+            <li><strong>Ouvrez</strong> Postman et utilisez ce token comme "recipient"</li>
+            <li><strong>Envoyez</strong> une notification via votre API Spring Boot</li>
+        </ol>
+    </div>
+
+    <div class="instructions" style="background: #e7f3ff; border-left-color: #667eea;">
+        <h3 style="color: #004085;">💡 Exemple Postman:</h3>
+        <pre style="background: white; padding: 15px; border-radius: 5px; overflow-x: auto;"></pre>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+<script>
+    // ⚠️ REMPLACEZ CES VALEURS PAR LES VÔTRES
+    const firebaseConfig = {
+        apiKey: "AIzaSyA0-rt-JzOFy5Gqa-6-RV50ZXxIl62aPEI",
+        authDomain: "notification-push-test-tekup.firebaseapp.com",
+        projectId: "notification-push-test-tekup",
+        storageBucket: "notification-push-test-tekup.firebasestorage.app",
+        messagingSenderId: "112186616489",
+        appId: "1:112186616489:web:7547d31c6761ec7ab957b8",
+        measurementId: "G-2MF8TXBF32"
+    };
+
+    const VAPID_KEY = "BLTdskO8dJ8UdNI_xHYk7gxr2KvvyJYSTR5n4fobhg94ShYD2bqbIq_Gb_m0ssSs_2Ya2DXJ30ZFsEqIYvolh5Q";
+
+    // Initialiser Firebase
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    let currentToken = '';
+
+    function showStatus(message, type) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.className = 'status ' + type;
+        statusDiv.innerHTML = message;
+    }
+
+    async function requestPermission() {
+        try {
+            showStatus('⏳ Demande de permission...', 'info');
+
+            const permission = await Notification.requestPermission();
+
+            if (permission === 'granted') {
+                showStatus('✅ Permission accordée! Récupération du token...', 'success');
+
+                currentToken = await messaging.getToken({
+                    vapidKey: VAPID_KEY
+                });
+
+                document.getElementById('tokenSection').style.display = 'block';
+                document.getElementById('token').textContent = currentToken;
+                document.getElementById('copyBtn').disabled = false;
+
+                showStatus('✅ Token récupéré! <span class="badge">Prêt à tester</span>', 'success');
+
+                console.log('FCM Token:', currentToken);
+            } else {
+                showStatus('❌ Permission refusée. Veuillez autoriser les notifications dans Chrome.', 'error');
+            }
+        } catch (error) {
+            showStatus('❌ Erreur: ' + error.message, 'error');
+            console.error('Error:', error);
+        }
+    }
+
+    function copyToken() {
+        if (currentToken) {
+            navigator.clipboard.writeText(currentToken).then(() => {
+                showStatus('✅ Token copié! Collez-le dans Postman comme "recipient"', 'success');
+
+                // Animation de confirmation
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copié!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    }
+
+    // Écouter les notifications en temps réel
+    messaging.onMessage((payload) => {
+        console.log('🔔 Notification reçue:', payload);
+
+        const demo = document.getElementById('notificationDemo');
+        const content = document.getElementById('notificationContent');
+
+        content.innerHTML = `
+                <strong>${payload.notification.title}</strong><br>
+                ${payload.notification.body}
+            `;
+
+        demo.classList.add('show');
+
+        // Afficher une notification native Chrome
+        if (Notification.permission === 'granted') {
+            new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: 'https://img.icons8.com/color/96/000000/notification.png',
+                badge: 'https://img.icons8.com/color/96/000000/notification.png'
+            });
+        }
+
+        showStatus('🔔 Notification reçue avec succès!', 'success');
+    });
+
+    // Vérifier si les notifications sont déjà autorisées
+    window.onload = function() {
+        if (Notification.permission === 'granted') {
+            showStatus('ℹ️ Les notifications sont déjà autorisées. Cliquez sur "Activer" pour obtenir le token.', 'info');
+        }
+    };
+</script>
+</body>
+</html>

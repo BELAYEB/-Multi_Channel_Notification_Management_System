@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * Builder for creating the notification handler chain
  */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -17,12 +18,17 @@ public class NotificationChainBuilder {
     private final PushHandler pushHandler;
 
     public NotificationHandler buildChain() {
-        log.info("Building notification handler chain");
+        log.info("╔════════════════════════════════════════╗");
+        log.info("║   CONSTRUCTION DE LA CHAÎNE            ║");
+        log.info("╚════════════════════════════════════════╝");
 
-        // Build the chain: Email -> SMS -> Push
+        // Construire la chaîne: Email → SMS → Push
         emailHandler.setNext(smsHandler);
         smsHandler.setNext(pushHandler);
 
-        return emailHandler; // Return the first handler
+        log.info("✅ Chaîne construite: 📧 Email → 📱 SMS → 🔔 Push");
+        log.info("════════════════════════════════════════");
+
+        return emailHandler; // Retourner le premier maillon
     }
 }

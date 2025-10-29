@@ -14,10 +14,15 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class SMSHandler extends BaseNotificationHandler {
 
     private final SMSService smsService;
+
+
+    public SMSHandler(SMSService smsService) {
+        super("📱 SMSHandler");
+        this.smsService = smsService;
+    }
 
     @Override
     public void handle(Notification notification) {

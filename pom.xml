@@ -72,6 +72,14 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <!-- Firebase Admin SDK for Push Notifications -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.3.0</version>
+        </dependency>
+
+
         <!-- SpringDoc OpenAPI (Swagger) -->
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -85,6 +93,9 @@
             <artifactId>twilio</artifactId>
             <version>9.14.1</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.google.firebase/firebase-messaging -->
+        <!-- https://mvnrepository.com/artifact/com.google.firebase/firebase-messaging -->
 
     </dependencies>
 

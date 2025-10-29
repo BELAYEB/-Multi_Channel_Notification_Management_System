@@ -10,22 +10,35 @@ import org.springframework.stereotype.Component;
 /**
  * Concrete handler for Email notifications
  */
+
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class EmailHandler extends BaseNotificationHandler {
 
     private final EmailService emailService;
 
+    public EmailHandler(EmailService emailService) {
+        super("📧 EmailHandler");
+        this.emailService = emailService;
+    }
+
     @Override
     public void handle(Notification notification) {
+        log.info("════════════════════════════════════════");
+        log.info("🔍 {} reçoit la notification", handlerName);
+        log.info("   Canal demandé: {}", notification.getChannel());
+        log.info("   Destinataire: {}", notification.getRecipient());
+
         if (canHandle(notification)) {
-            log.info("EmailHandler processing notification for: {}",
-                    notification.getRecipient());
+            log.info("✅ {} PEUT traiter cette notification!", handlerName);
+            log.info("🚀 Traitement en cours...");
             process(notification);
+            log.info("✅ {} a TERMINÉ avec succès!", handlerName);
         } else {
+            log.info("❌ {} ne peut PAS traiter le canal {}", handlerName, notification.getChannel());
             passToNext(notification);
         }
+        log.info("════════════════════════════════════════");
     }
 
     @Override
@@ -35,16 +48,10 @@ public class EmailHandler extends BaseNotificationHandler {
 
     @Override
     protected void process(Notification notification) {
-        try {
-            emailService.sendEmail(
-                    notification.getRecipient(),
-                    notification.getSubject(),
-                    notification.getMessage()
-            );
-            log.info("Email sent successfully to: {}", notification.getRecipient());
-        } catch (Exception e) {
-            log.error("Failed to send email to: {}", notification.getRecipient(), e);
-            throw new RuntimeException("Email sending failed", e);
-        }
+        emailService.sendEmail(
+                notification.getRecipient(),
+                notification.getSubject(),
+                notification.getMessage()
+        );
     }
 }

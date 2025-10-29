@@ -44,7 +44,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: mahmoudbelayeb@gmail.com
-    password:   # ?? Remplacez par VOTRE mot de passe d'application (16 caractères)
+    password: dpkk tbtp leiq uifm   # ?? Remplacez par VOTRE mot de passe d'application (16 caractères)
     properties:
       mail:
         smtp:
@@ -106,8 +106,8 @@ twilio:
 
 # Optional: Firebase Configuration (if using real Push notifications)
 firebase:
-  enabled: false
+  enabled: true
   credentials:
-    path: classpath:firebase-service-account.json
+    path: classpath:firebase-credentials.json
 
 
