@@ -23,9 +23,7 @@
 5. [Design Patterns Implémentés](#-design-patterns-implémentés)
 6. [Principes SOLID](#-principes-solid)
 7. [Technologies Utilisées](#-technologies-utilisées)
-8. [Installation et Configuration](#-installation-et-configuration)
-9. [API Documentation](#-api-documentation)
-10. [Tests et Démonstration](#-tests-et-démonstration)
+
 
 ---
 
@@ -49,22 +47,19 @@ Système complet de gestion de notifications multi-canal permettant l'envoi de m
 
 #### 📧 Multi-Canal
 - **Email** : Envoi via SMTP (Gmail) avec support HTML
-- **SMS** : Envoi via API Twilio
+- **SMS** : [Envoi via API Twilio]
 - **Push** : Notifications via Firebase Cloud Messaging
 
 #### 🎨 Gestion des Templates
 - Templates réutilisables (Welcome, Order Confirmation, Password Reset, etc.)
-- Personnalisation dynamique avec variables
 - Cache intelligent pour optimisation mémoire (Pattern Flyweight)
 
 #### 🔄 Routage Automatique
 - Sélection automatique du canal via Chain of Responsibility
 - Gestion intelligente des erreurs
-- Mécanisme de retry automatique
 
 #### 📊 API REST
 - Endpoints RESTful pour toutes les opérations
-- Documentation interactive (Swagger/OpenAPI)
 - Statistiques en temps réel
 
 ---
@@ -107,9 +102,9 @@ Les couches supérieures dépendent d'**abstractions** (interfaces), pas d'impl�
 
 ```java
 public class NotificationService {
-private final NotificationRepository repository; // Interface
-private final EmailService emailService; // Interface
-private final MessageTemplateFactory templateFactory; // Abstraction
+  private final NotificationRepository repository; // Interface
+  private final EmailService emailService; // Interface
+  private final MessageTemplateFactory templateFactory; // Abstraction
 }
 ```
 
@@ -189,17 +184,29 @@ capture package diagram
 
 ### Flux de Données
 Client HTTP Request
-↓
+
+        ↓
+        
 NotificationController (Presentation)
-↓ [DTO → Model]
+
+        ↓ [DTO → Model]
+        
 NotificationService (Business)
-↓ [Uses Chain]
+
+        ↓ [Uses Chain]
+        
 EmailHandler/SMSHandler/PushHandler (Business)
-↓ [Uses Infrastructure]
+
+        ↓ [Uses Infrastructure]
+        
 EmailService/SMSService/PushService (Infrastructure)
-↓ [Saves to DB]
+
+        ↓ [Saves to DB]
+        
 NotificationRepository (Persistence)
-↓
+
+        ↓
+        
 Database (MySQL)
 
 
