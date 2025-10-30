@@ -342,9 +342,6 @@ public class NotificationChainBuilder {
 ```
 
 
-#### Diagramme de Séquence - Envoi SMS
-
-capture sequence diagram
 
 #### Avantages Démontrés
 
