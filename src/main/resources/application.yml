@@ -43,8 +43,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: mahmoudbelayeb@gmail.com
-    password: dpkk tbtp leiq uifm   # ?? Remplacez par VOTRE mot de passe d'application (16 caractères)
+    username: 
+    password:    # ?? Remplacez par VOTRE mot de passe d'application (16 caractÃ¨res)
     properties:
       mail:
         smtp:
@@ -55,7 +55,7 @@ spring:
           connectiontimeout: 10000
           timeout: 10000
           writetimeout: 10000
-        debug: true  # Pour voir les logs détaillés
+        debug: true  # Pour voir les logs dÃ©taillÃ©s
     default-encoding: UTF-8
 
 
