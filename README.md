@@ -794,29 +794,14 @@ public interface NotificationService {
 
 ##### ✅ Bonne Approche (ISP Respecté)
 ```java
-// Interfaces spécifiques et cohésives
+// Interface minimale et commune qui va être implementée pour chaque cas d'utilisation
 
-public interface EmailService {
-  void sendEmail(String to, String subject, String body);
-  void sendHtmlEmail(String to, String subject, String htmlBody);
+public interface NotificationHandler {
+    void setNext(NotificationHandler handler);
+    void handle(Notification notification);
 }
 
-public interface SMSService {
-  void sendSMS(String phoneNumber, String message);
-}
 
-public interface PushService {
-  void sendPushNotification(String deviceToken, String title, String body);
-}
-
-// Chaque handler dépend uniquement de ce dont il a besoin
-public class EmailHandler extends BaseNotificationHandler {
-  private final EmailService emailService; // ✅ Seulement EmailService
-}
-
-public class SMSHandler extends BaseNotificationHandler {
-  private final SMSService smsService; // ✅ Seulement SMSService
-}
 ```
 
 **Avantage** : Classes légères. Dépendances minimales. Tests simplifiés.
